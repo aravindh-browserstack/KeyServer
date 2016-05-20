@@ -19,8 +19,8 @@ module KeyServer
       while @keys.size < @max_size && create_count < size
         key = SecureRandom.hex.to_sym
         @lock.synchronize {
-          if @keys[key.to_sym] == nil
-            @keys[key.to_sym] = {created_at: Time.now}
+          if @keys[key] == nil
+            @keys[key] = {created_at: Time.now}
             create_count += 1
           end
         }
@@ -48,7 +48,11 @@ module KeyServer
     end
 
     def release_key(k)
-      if @used[k.to_sym] == nil
+      val = nil
+      @lock.synchronize {
+        val = @used[k.to_sym]
+      }
+      if val == nil
         return false
       else
         @lock.synchronize {
@@ -60,7 +64,11 @@ module KeyServer
     end
     
     def delete_key(k)
-      if @used[k.to_sym] == nil
+      val = nil
+      @lock.synchronize {
+        val = @used[k.to_sym]
+      }
+      if val == nil
         false
       else
         @lock.synchronize {
@@ -71,8 +79,14 @@ module KeyServer
     end
 
     def keepalive(k)
-       if @keys[k.to_sym] == nil
-         if @used[k.to_sym] == nil
+       val_k = nil
+       val_u = nil
+       @lock.synchronize {
+         val_k = @keys[k.to_sym]
+         val_u = @used[k.to_sym]
+       }
+       if val_k == nil
+         if val_u == nil
            false
          else
            @lock.synchronize {
