@@ -20,7 +20,7 @@ module KeyServer
         key = SecureRandom.hex.to_sym
         @lock.synchronize {
           if @keys[key.to_sym] == nil
-            @keys[key.to_sym] = {created_at: Time.now, ttl: 300}
+            @keys[key.to_sym] = {created_at: Time.now}
             create_count += 1
           end
         }
@@ -53,7 +53,7 @@ module KeyServer
       else
         @lock.synchronize {
           @used.delete(k.to_sym)
-          @keys[k.to_sym] = {created_at: Time.now, ttl: 300} 
+          @keys[k.to_sym] = {created_at: Time.now} 
         } 
       end
       return true 
@@ -81,7 +81,7 @@ module KeyServer
          end
        else
          @lock.synchronize {
-           @keys[k.to_sym] = {created_at: Time.now, ttl: 300}
+           @keys[k.to_sym] = {created_at: Time.now}
          }
        end
     end
@@ -91,7 +91,7 @@ module KeyServer
         @lock.synchronize  {
           if Time.now - @used[x][:assigned_at] > 60
               @used.delete(x)
-              @keys[x] = {created_at: Time.now, ttl: 300}
+              @keys[x] = {created_at: Time.now}
           end
         } 
       }
